@@ -1,6 +1,4 @@
-# KHALRS multi-file PyTorch reproduction
-
-This project reproduces the manuscript **Knowledge-Enhanced Hierarchical Attention Network for Personalized Resource Recommendation in Vocational College Libraries**.
+# KHALRS
 
 ## Implemented components
 
