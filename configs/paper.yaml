@@ -1,0 +1,43 @@
+seed: 42
+device: auto
+
+model:
+  embedding_dim: 128
+  relation_dim: 128
+  attention_hidden_dim: 128
+  num_heads: 4
+  semester_dim: 64
+  dropout: 0.30
+  max_sessions: 8
+  max_items_per_session: 16
+  max_domains: 8
+  max_courses: 8
+  kg_neighbors: 16
+  decoder_activation: gelu
+  freeze_kg_during_rec: false
+
+kg_pretrain:
+  epochs: 10
+  batch_size: 2048
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  margin: 1.0
+  negative_ratio: 1
+
+training:
+  epochs: 100
+  batch_size: 2048
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  negative_ratio: 4
+  lambda_kg: 0.10
+  lambda_curr: 0.01
+  lambda_reg: 0.0001
+  curriculum_margin: 0.20
+  patience: 20
+  num_workers: 0
+  grad_clip: 5.0
+
+evaluation:
+  ks: [5, 10, 20]
+  score_chunk_size: 2048
