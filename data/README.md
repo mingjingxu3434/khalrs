@@ -47,21 +47,9 @@ Command-line interface used to run the preprocessing pipeline.
 
 ---
 
-## 2. Requirements
 
-Python 3.9 or later is recommended.
 
-Install the required packages with:
-
-```bash
-pip install pandas numpy pyarrow
-```
-
-`pyarrow` is only needed when Parquet files are used.
-
----
-
-## 3. Input files
+## 2. Input files
 
 At minimum, two files are required.
 
@@ -106,41 +94,11 @@ Not every field is mandatory. The pipeline uses fields that are actually availab
 
 ---
 
-## 4. Optional files
 
-### Course mapping file
 
-An optional course/curriculum file can be supplied to construct:
+## 3. Processing procedure
 
-- `alignedWithCourse`
-- `prerequisiteOf`
-
-relations.
-
-Example:
-
-```csv
-course,concept,curriculum,prerequisite
-machine learning,deep learning,data science,linear algebra
-```
-
-### Co-citation file
-
-An optional co-citation file can be supplied to construct the `coCited` relation.
-
-Example:
-
-```csv
-item_a,item_b
-b001,b005
-b003,b007
-```
-
----
-
-## 5. Processing procedure
-
-### 5.1 Duplicate removal
+### 3.1 Duplicate removal
 
 Repeated records with identical:
 
@@ -152,7 +110,7 @@ timestamp
 
 are removed.
 
-### 5.2 Metadata normalization
+### 3.2 Metadata normalization
 
 The implementation performs:
 
@@ -162,7 +120,7 @@ The implementation performs:
 - normalization of common resource type labels;
 - splitting of multi-value category, keyword, author, and discipline fields.
 
-### 5.3 Dataset-specific filtering
+### 3.3 Dataset-specific filtering
 
 Three dataset modes are supported.
 
@@ -202,7 +160,7 @@ The filtering vocabulary is stored in `config.py` and can be modified without ch
 
 ---
 
-## 6. 5-core interaction filtering
+## 4. 5-core interaction filtering
 
 The manuscript retains users and items with at least five interactions.
 
@@ -217,7 +175,7 @@ The procedure is repeated until no additional user or item falls below the thres
 
 ---
 
-## 7. Chronological split
+## 5. Chronological split
 
 Interactions are sorted by timestamp separately for each user.
 
@@ -233,48 +191,8 @@ This prevents later interactions from entering the training set for the same use
 
 ---
 
-## 8. Knowledge graph construction
 
-The implementation supports the five relation types described in the manuscript:
-
-```text
-hasConcept
-coCited
-sameDiscipline
-prerequisiteOf
-alignedWithCourse
-```
-
-### `hasConcept`
-
-Constructed from item metadata such as:
-
-- categories;
-- keywords;
-- titles;
-- abstracts;
-- authors;
-- publishers.
-
-### `coCited`
-
-Constructed from an optional item-item co-citation or co-occurrence table.
-
-### `sameDiscipline`
-
-Connects concepts associated with the same discipline.
-
-### `prerequisiteOf`
-
-Constructed from course prerequisite metadata.
-
-### `alignedWithCourse`
-
-Connects courses with concepts or curriculum nodes.
-
----
-
-## 9. Running the code
+## 6. Running the code
 
 ### Goodreads
 
@@ -308,169 +226,3 @@ python main.py \
 
 ---
 
-## 10. Custom column names
-
-If the raw dataset uses different field names, they can be specified directly.
-
-Example:
-
-```bash
-python main.py \
-  --dataset goodreads \
-  --interactions reviews.csv \
-  --metadata books.csv \
-  --output-dir processed/goodreads \
-  --user-col user \
-  --item-col book_id \
-  --time-col date_added \
-  --meta-item-col book_id \
-  --title-col name \
-  --category-col genres
-```
-
-This design avoids assuming that Goodreads, MIND, and Douban use identical raw schemas.
-
----
-
-## 11. Adding curriculum information
-
-Example:
-
-```bash
-python main.py \
-  --dataset goodreads \
-  --interactions data/interactions.csv \
-  --metadata data/books.csv \
-  --courses data/course_mapping.csv \
-  --output-dir processed/goodreads
-```
-
----
-
-## 12. Adding co-citation information
-
-Example:
-
-```bash
-python main.py \
-  --dataset goodreads \
-  --interactions data/interactions.csv \
-  --metadata data/books.csv \
-  --cocited data/cocited.csv \
-  --output-dir processed/goodreads
-```
-
----
-
-## 13. Output files
-
-Each run produces:
-
-```text
-train.csv
-valid.csv
-test.csv
-metadata.csv
-kg_triples.csv
-user_mapping.csv
-item_mapping.csv
-stats.json
-```
-
-### `train.csv`
-
-Training interactions.
-
-### `valid.csv`
-
-Validation interactions.
-
-### `test.csv`
-
-Test interactions.
-
-### `metadata.csv`
-
-Filtered and normalized item metadata.
-
-### `kg_triples.csv`
-
-Knowledge graph triples with columns:
-
-```text
-head
-relation
-tail
-```
-
-### `user_mapping.csv`
-
-Mapping between raw and anonymized user IDs.
-
-### `item_mapping.csv`
-
-Mapping between raw and anonymized item IDs.
-
-### `stats.json`
-
-Summary statistics of the processed dataset.
-
-Example:
-
-```json
-{
-  "dataset": "goodreads",
-  "users": 10000,
-  "items": 25000,
-  "interactions": 500000,
-  "train": 350000,
-  "valid": 50000,
-  "test": 100000,
-  "kg_triples": 120000,
-  "relations": [
-    "alignedWithCourse",
-    "coCited",
-    "hasConcept",
-    "prerequisiteOf",
-    "sameDiscipline"
-  ]
-}
-```
-
----
-
-## 14. Notes on reproducibility
-
-The manuscript specifies the high-level construction pipeline but does not define one universal raw-file schema or a fixed NLP concept extraction model for all three source datasets.
-
-For this reason:
-
-- raw column names are configurable;
-- metadata filters are deterministic;
-- concept extraction uses a lightweight deterministic rule;
-- train/validation/test splitting is deterministic;
-- anonymized IDs are generated using SHA-256 with a fixed salt.
-
-The salt can be changed with:
-
-```bash
---salt your-own-salt
-```
-
----
-
-## 15. Scope
-
-This repository intentionally contains **data preprocessing only**.
-
-It does not include:
-
-- KHALRS neural network implementation;
-- KG embedding training;
-- hierarchical attention training;
-- BPR optimization;
-- baseline models;
-- evaluation metrics;
-- statistical testing.
-
-This separation makes the released preprocessing pipeline easier to audit and reproduce.
