@@ -34,7 +34,7 @@
    Default follows Method (`freeze_kg_during_rec: false`); the flag can reproduce the frozen variant.
 3. The setup lists `lambda_1=0.1`, `lambda_2=0.01`, `lambda_3=1e-4` without naming them.
    This implementation maps them to KG, curriculum, and explicit L2 regularization.
-4. The processed LibRS-HVS / MIND-Edu / DouBan-Acad files and exact preprocessing pipeline are not
+4. The processed Goodreads / MIND-Edu / DouBan-Acad files and exact preprocessing pipeline are not
    included in the manuscript, so exact table-number reproduction cannot be guaranteed from the paper text alone.
 5. The HAE equations are additive-attention equations, while Experimental Setup mentions 4 attention heads per HAE level. This implementation follows the equations for HAE and uses 4 heads in the explicitly multi-head CKF block.
 
